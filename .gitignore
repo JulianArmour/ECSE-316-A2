@@ -137,3 +137,5 @@ dmypy.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/other.xml
+/Pipfile
+/.idea/vcs.xml
