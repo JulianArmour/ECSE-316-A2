@@ -1,8 +1,9 @@
 from cmath import exp, pi
+
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib import colors as colors
+from matplotlib import pyplot as plt
 
 
 def slowft(sig):
@@ -33,12 +34,14 @@ def ifastft(sig):
 def fastft2(sig):
     def axis_fft(a, axis):
         return np.apply_along_axis(fastft, axis, a)
+
     return np.apply_over_axes(axis_fft, sig, [0, 1])
 
 
 def ifastft2(sig):
     def axis_ifft(a, axis):
         return np.apply_along_axis(ifastft, axis, a)
+
     return np.apply_over_axes(axis_ifft, sig, [0, 1])
 
 
@@ -76,30 +79,73 @@ def mode1(imgpath='moonlanding.png'):
     plt.show()
 
 
-def mode2(img_path='moonlanding.png', red=0.9):
+def mode2(img_path='moonlanding.png', red=0.8):
     """
     Filters an image's frequencies using a reduction factor.
-    Example:
-        if red = 0.8 then
-    :param img_path: path to an image file
-    :param red: reduction factor
+    red * height is removed from the image's frequencies, starting from
+    high frequencies; similarly with width.
+
+    :param img_path: path to an image file.
+    :param red: reduction factor to apply to height and width.
     """
     image = cv2.imread(img_path, 0)
     ih, iw = image.shape
     pimg = pad_image(image)  # padded image
-    freq = np.fft.fft2(pimg)
-    frows, fcols = freq.shape
-    r, c = np.ogrid[:frows, :fcols]
-    mask = (r > int((1 - red) * frows)) & (r < red * frows) | (c > int((1 - red) * fcols)) & (c < red * fcols)
+    freq = fastft2(pimg)
+    f_rows, f_cols = freq.shape
+    r, c = np.ogrid[:f_rows, :f_cols]
+    fcrow = f_rows // 2  # frequency center row
+    fccol = f_cols // 2  # frequency center column
+    mask = (r >= int((1 - red) * fcrow)) & (r < (1 + red) * fcrow) | \
+           (c >= int((1 - red) * fccol)) & (c < (1 + red) * fccol)
     freq[mask] = 0
-    filtimg = np.real(np.fft.ifft2(freq))[:ih, :iw]
+    # freq[int(fcrow * (1 - red)): int(fcrow * (1 + red)), int(fccol * (1 - red)): int(fccol * (1 + red))] = 0
+    filtimg = np.real(ifastft2(freq))[:ih, :iw]
     plt.subplot(121)
-    plt.imshow(image, cmap='gray'), plt.title('Original'), plt.xticks([]), plt.yticks([])
+    plt.imshow(image, cmap='gray'), plt.title('Original image'), plt.xticks([]), plt.yticks([])
     plt.subplot(122)
-    plt.imshow(filtimg, cmap='gray'), plt.title('filtered'), plt.xticks([]), plt.yticks([])
+    plt.imshow(filtimg, cmap='gray'), plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
     plt.show()
     # print number of non-zeros leftover and fraction they represent of original Fourier coefficients
-    non_zeros = int(frows * fcols * (4 * ((1 - red) ** 2)))
-    frac_of_fourier = non_zeros / (frows * fcols)
+    non_zeros = int(f_rows * f_cols * (4 * ((1 - red) ** 2)))
+    frac_of_fourier = non_zeros / (f_rows * f_cols)
     print(f'Number of non-zeros: {non_zeros}')
     print(f'Fraction of original Fourier: {frac_of_fourier}')
+
+
+def parse_argv(argv_list):
+    def parse_flags(flag_list):
+        if not flag_list:
+            return {}
+        flg, flg_arg, *rest = flag_list
+        if flg == '-m':
+            return {'mode': flg_arg, **parse_flags(rest)}
+        elif flg == '-i':
+            return {'image': flg_arg, **parse_flags(rest)}
+        else:
+            return {}
+
+    return parse_flags(argv_list[1:])
+
+
+if __name__ == "__main__":
+    from sys import argv
+
+    if len(argv) % 2 != 1:
+        print('Invalid number of arguments')
+        exit(-1)
+    args = parse_argv(argv)
+    args.setdefault('mode', '1')
+    args.setdefault('image', 'moonlanding.png')
+    mode_ = args['mode']
+    image_ = args['image']
+    if mode_ == '1':
+        mode1(image_)
+    elif mode_ == '2':
+        mode2(image_)
+    elif mode_ == '3':
+        # TODO
+        raise Exception("mode 3 not implemented")
+    elif mode_ == '4':
+        # TODO
+        raise Exception("mode 4 not implemented")
