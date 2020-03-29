@@ -2,8 +2,10 @@ from cmath import exp, pi
 
 import cv2
 import numpy as np
+import math    
 from matplotlib import colors as colors
 from matplotlib import pyplot as plt
+from copy import copy, deepcopy
 
 
 def slowft(sig):
@@ -113,6 +115,7 @@ def mode2(img_path='moonlanding.png', red=0.8):
     print(f'Fraction of original Fourier: {frac_of_fourier}')
     
  def mode3(img_path='moonlanding.png'):
+    tempArray = []
     image = cv2.imread(img_path, 0)
     ih, iw = image.shape
     pimg = pad_image(image)
@@ -120,26 +123,30 @@ def mode2(img_path='moonlanding.png', red=0.8):
     f_rows, f_cols = freq.shape
     #Compression 0%
     filtimg0 = np.real(ifastft2(freq))[:ih, :iw]
-    #Compression 10%
-    toSort = deepcopy(freq)
-    toSort.flatten()
-    toSort.sort()
-    toCompressTen = deepcopy(freq)
-    indexTen = math.floor(len(temp)*.1)
-    ##ITERATE THROUGH COMPLEZ ARRAY TO SET TO 0
-    
+    #Take the complex array and make it 1D to be able to sort and get percentile
+    for i in range(f_rows):
+        for j in range (f_cols):
+            tempArray.append(freq[i][j])
+    # sort the array
+    tempArray.sort()
+    # Get the value of element in the 10% place
+    index10 = math.floor(len(tempArray)*.1)
+    print(index10)
+    print(tempArray[index10])
+    # we will make a deep copy of the original frequency to be able to change the values
+    toCompress10 = deepcopy(freq)
+    # If the value is under the threshold, we set it to 0
+    np.where(toCompress10 < tempArray[index10], toCompress10, 0)
+    # we take the inverse to get the imge back
+    filtimg10 = np.real(ifastft2(toCompress10))[:ih, :iw]
+    # we calculate how many 0 in the array
+    print(np.count_nonzero(freq))
+    print(np.count_nonzero(toCompress10))
+    ##Display images
     plt.subplot(131)
     plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 0'), plt.xticks([]), plt.yticks([])
     plt.subplot(132)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 10'), plt.xticks([]), plt.yticks([])
-    plt.subplot(133)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 30'), plt.xticks([]), plt.yticks([])
-    plt.subplot(231)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 50'), plt.xticks([]), plt.yticks([])
-    plt.subplot(232)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 75'), plt.xticks([]), plt.yticks([])
-    plt.subplot(233)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 95'), plt.xticks([]), plt.yticks([])
+    plt.imshow(filtimg10, cmap='gray'), plt.title('Compression 10'), plt.xticks([]), plt.yticks([])
     plt.show()   
 
 
