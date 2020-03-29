@@ -115,7 +115,6 @@ def mode2(img_path='moonlanding.png', red=0.8):
     print(f'Fraction of original Fourier: {frac_of_fourier}')
     
  def mode3(img_path='moonlanding.png'):
-    tempArray = []
     image = cv2.imread(img_path, 0)
     ih, iw = image.shape
     pimg = pad_image(image)
@@ -124,30 +123,57 @@ def mode2(img_path='moonlanding.png', red=0.8):
     #Compression 0%
     filtimg0 = np.real(ifastft2(freq))[:ih, :iw]
     #Take the complex array and make it 1D to be able to sort and get percentile
-    for i in range(f_rows):
-        for j in range (f_cols):
-            tempArray.append(freq[i][j])
-    # sort the array
-    tempArray.sort()
+    flattend = freq.flatten()
+    flattend.sort()
     # Get the value of element in the 10% place
-    index10 = math.floor(len(tempArray)*.1)
-    print(index10)
-    print(tempArray[index10])
+    index10 = math.floor(flattend.size*0.1)
+    index30 = math.floor(flattend.size*0.3)
+    index50 = math.floor(flattend.size*0.5)
+    index75 = math.floor(flattend.size*0.75)
+    index95 = math.floor(flattend.size*0.95)
     # we will make a deep copy of the original frequency to be able to change the values
-    toCompress10 = deepcopy(freq)
+    toCompress10 = freq
+    toCompress30 = freq
+    toCompress50 = freq
+    toCompress75 = freq
+    toCompress95 = freq
     # If the value is under the threshold, we set it to 0
-    np.where(toCompress10 < tempArray[index10], toCompress10, 0)
+    newArray10 = np.where(toCompress10 > flattend[index10], toCompress10, 0)
+    newArray30 = np.where(toCompress30 > flattend[index30], toCompress30, 0)
+    newArray50 = np.where(toCompress50 > flattend[index50], toCompress50, 0)
+    newArray75 = np.where(toCompress75 > flattend[index75], toCompress75, 0)
+    newArray95 = np.where(toCompress95 > flattend[index95], toCompress95, 0)
     # we take the inverse to get the imge back
-    filtimg10 = np.real(ifastft2(toCompress10))[:ih, :iw]
-    # we calculate how many 0 in the array
-    print(np.count_nonzero(freq))
-    print(np.count_nonzero(toCompress10))
+    filtimg10 = np.real(ifastft2(newArray10))[:ih, :iw]
+    filtimg30 = np.real(ifastft2(newArray30))[:ih, :iw]
+    filtimg50 = np.real(ifastft2(newArray50))[:ih, :iw]
+    filtimg75 = np.real(ifastft2(newArray75))[:ih, :iw]
+    filtimg95 = np.real(ifastft2(newArray95))[:ih, :iw]
+
     ##Display images
     plt.subplot(131)
-    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 0'), plt.xticks([]), plt.yticks([])
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 0')
     plt.subplot(132)
-    plt.imshow(filtimg10, cmap='gray'), plt.title('Compression 10'), plt.xticks([]), plt.yticks([])
-    plt.show()   
+    plt.imshow(filtimg10, cmap='gray'), plt.title('Compression 10')
+    plt.subplot(133)
+    plt.imshow(filtimg30, cmap='gray'), plt.title('Compression 30')
+    plt.show()
+    plt.subplot(231)
+    plt.imshow(filtimg50, cmap='gray'), plt.title('Compression 50')
+    plt.subplot(232)
+    plt.imshow(filtimg75, cmap='gray'), plt.title('Compression 75')
+    plt.subplot(233)
+    plt.imshow(filtimg95, cmap='gray'), plt.title('Compression 95')
+    plt.show()
+    
+    # we calculate how many 0 in the array
+    print("Non zeros with 0% compression: ",np.count_nonzero(freq))
+    print("Non zeros with 10% compression: ",np.count_nonzero(newArray10))
+    print("Non zeros with 30% compression: ",np.count_nonzero(newArray30))
+    print("Non zeros with 50% compression: ",np.count_nonzero(newArray50))
+    print("Non zeros with 75% compression: ",np.count_nonzero(newArray75))
+    print("Non zeros with 95% compression: ",np.count_nonzero(newArray95))
+       
 
 
 def parse_argv(argv_list):
