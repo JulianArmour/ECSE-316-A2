@@ -111,6 +111,36 @@ def mode2(img_path='moonlanding.png', red=0.8):
     frac_of_fourier = non_zeros / (f_rows * f_cols)
     print(f'Number of non-zeros: {non_zeros}')
     print(f'Fraction of original Fourier: {frac_of_fourier}')
+    
+ def mode3(img_path='moonlanding.png'):
+    image = cv2.imread(img_path, 0)
+    ih, iw = image.shape
+    pimg = pad_image(image)
+    freq = fastft2(pimg)
+    f_rows, f_cols = freq.shape
+    #Compression 0%
+    filtimg0 = np.real(ifastft2(freq))[:ih, :iw]
+    #Compression 10%
+    toSort = deepcopy(freq)
+    toSort.flatten()
+    toSort.sort()
+    toCompressTen = deepcopy(freq)
+    indexTen = math.floor(len(temp)*.1)
+    ##ITERATE THROUGH COMPLEZ ARRAY TO SET TO 0
+    
+    plt.subplot(131)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 0'), plt.xticks([]), plt.yticks([])
+    plt.subplot(132)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 10'), plt.xticks([]), plt.yticks([])
+    plt.subplot(133)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 30'), plt.xticks([]), plt.yticks([])
+    plt.subplot(231)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 50'), plt.xticks([]), plt.yticks([])
+    plt.subplot(232)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 75'), plt.xticks([]), plt.yticks([])
+    plt.subplot(233)
+    plt.imshow(filtimg0, cmap='gray'), plt.title('Compression 95'), plt.xticks([]), plt.yticks([])
+    plt.show()   
 
 
 def parse_argv(argv_list):
@@ -144,8 +174,7 @@ if __name__ == "__main__":
     elif mode_ == '2':
         mode2(image_)
     elif mode_ == '3':
-        # TODO
-        raise Exception("mode 3 not implemented")
+        mode3(image_)
     elif mode_ == '4':
         # TODO
         raise Exception("mode 4 not implemented")
