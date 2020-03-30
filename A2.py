@@ -2,7 +2,9 @@ from cmath import exp, pi
 
 import cv2
 import numpy as np
-import math    
+import math
+import random
+import time
 from matplotlib import colors as colors
 from matplotlib import pyplot as plt
 from copy import copy, deepcopy
@@ -173,6 +175,140 @@ def mode2(img_path='moonlanding.png', red=0.8):
     print("Non zeros with 50% compression: ",np.count_nonzero(newArray50))
     print("Non zeros with 75% compression: ",np.count_nonzero(newArray75))
     print("Non zeros with 95% compression: ",np.count_nonzero(newArray95))
+    
+def mode4():
+    array1 = np.random.random(32) + np.random.random(32) * 1j
+    complex1 = 32 * 32
+    array2 = np.random.random(64) + np.random.random(64) * 1j
+    complex2 = 64 * 64
+    array3 = np.random.random(256) + np.random.random(256) * 1j
+    complex3 = 256 * 256
+    array4 = np.random.random(1024) + np.random.random(1024) * 1j
+    complex4 = 1024 * 1024
+    array5 = np.random.random(4096) + np.random.random(4096) * 1j
+    complex5 = 4096 * 4096
+
+    ##For array1
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        slowft(array1)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0    
+    std1 = np.std(list)
+    mean1 = total/10
+    ##for array2
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        slowft(array2)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std2 = np.std(list)
+    mean2 = total/10
+    ##for array3
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        slowft(array3)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std3 = np.std(list)
+    mean3 = total/10
+    ##for array4
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        slowft(array4)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std4 = np.std(list)
+    mean4 = total/10
+    ##for array5
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        slowft(array5)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std5 = np.std(list)
+    mean5 = total/10
+    ###FASTFTF###
+    ##For array6
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        fastft(array1)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0    
+    std6 = np.std(list)
+    mean6 = total/10
+    ##for array7
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        fastft(array2)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std7 = np.std(list)
+    mean7 = total/10
+    ##for array8
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        fastft(array3)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std8 = np.std(list)
+    mean8 = total/10
+    ##for array9
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        fastft(array4)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std9 = np.std(list)
+    mean9 = total/10
+    ##for array10
+    total = 0
+    list = []
+    for i in range (10):
+        t0 = time.time()
+        fastft(array5)
+        t1 = time.time()
+        list.append(t1-t0)
+        total = total + t1-t0
+    std10 = np.std(list)
+    mean10 = total/10
+    x=[32,64,256,1024,4096]
+    y=[mean1,mean2,mean3,mean4,mean5]
+    z=[mean6,mean7,mean8,mean9,mean10]
+    plt.errorbar(x, y, yerr=[std1*2,std2*2,std3*2,std4*2,std5*2], fmt='-o')
+    plt.errorbar(x, z, yerr=[std6*2,std7*2,std8*2,std9*2,std10*2], fmt='-o')
+    plt.axis([0, 5000, 0, 20])
+    plt.suptitle('Algorithm Runtime vs. Problem Size', fontsize=20)
+    plt.xlabel('Problem Size ^2', fontsize=18)
+    plt.ylabel('Runtime (s)', fontsize=16)
+    plt.show()
        
 
 
@@ -209,5 +345,5 @@ if __name__ == "__main__":
     elif mode_ == '3':
         mode3(image_)
     elif mode_ == '4':
-        # TODO
+        mode4()
         raise Exception("mode 4 not implemented")
