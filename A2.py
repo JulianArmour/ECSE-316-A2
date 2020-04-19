@@ -116,7 +116,7 @@ def mode2(img_path='moonlanding.png', red=0.8):
     print(f'Number of non-zeros: {non_zeros}')
     print(f'Fraction of original Fourier: {frac_of_fourier}')
     
- def mode3(img_path='moonlanding.png'):
+def mode3(img_path='moonlanding.png'):
     image = cv2.imread(img_path, 0)
     ih, iw = image.shape
     pimg = pad_image(image)
@@ -346,4 +346,3 @@ if __name__ == "__main__":
         mode3(image_)
     elif mode_ == '4':
         mode4()
-        raise Exception("mode 4 not implemented")
